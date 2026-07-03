@@ -6,6 +6,7 @@ import { HabitDetail } from './routes/HabitDetail';
 import { Settings } from './routes/Settings';
 import { Onboarding } from './routes/Onboarding';
 import { EmptyState } from './routes/EmptyState';
+import { StyleGuide } from './routes/StyleGuide';
 
 /**
  * 6 個核心畫面的路由骨架。內容為佔位，供後續 stage 疊上實際 UI。
@@ -19,6 +20,7 @@ import { EmptyState } from './routes/EmptyState';
  */
 export const router = createBrowserRouter([
   { path: '/onboarding', element: <Onboarding /> },
+  { path: '/design', element: <StyleGuide /> },
   {
     path: '/',
     element: <AppLayout />,

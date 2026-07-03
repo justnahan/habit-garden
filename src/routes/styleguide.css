@@ -1,0 +1,85 @@
+/* Style-tile / 元件展示頁專屬佈局。開場原型＝index-as-content 圖鑑卡牆。 */
+.sg {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 var(--space-6) var(--space-9);
+}
+.sg-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding: var(--space-8) 0 var(--space-6);
+  border-bottom: 1.5px solid var(--color-rule);
+}
+.sg-top__title { font-size: var(--text-3xl); }
+.sg-top__id {
+  margin-top: var(--space-3);
+  max-width: 52ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+}
+.sg-top__anchor { margin-top: var(--space-2); }
+
+.sg-section { margin-top: var(--space-8); }
+.sg-section > header { margin-bottom: var(--space-5); }
+.sg-section h2 { font-size: var(--text-xl); }
+.sg-section h2 + p { margin-top: var(--space-2); color: var(--color-text-muted); font-size: var(--text-sm); }
+
+/* 生長圖鑑格 */
+.sg-atlas {
+  display: grid;
+  grid-template-columns: 96px repeat(5, 1fr);
+  gap: var(--space-3);
+  align-items: center;
+}
+.sg-atlas__head {
+  font-size: var(--text-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  text-align: center;
+}
+.sg-atlas__row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-weight: var(--weight-medium);
+}
+.sg-atlas__row-label .u-latin { font-size: var(--text-sm); color: var(--color-text-faint); }
+.sg-atlas__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+/* 色票 */
+.sg-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-3); }
+.sg-swatch { border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; background: var(--color-surface); }
+.sg-swatch__chip { height: 56px; }
+.sg-swatch__meta { padding: var(--space-3); display: flex; flex-direction: column; gap: 1px; }
+.sg-swatch__role { font-size: var(--text-sm); font-weight: var(--weight-medium); }
+.sg-swatch__hex { font-family: var(--font-display); font-variant-numeric: tabular-nums; font-size: var(--text-label); color: var(--color-text-faint); text-transform: uppercase; }
+
+/* 通用展示格 */
+.sg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-5); }
+.sg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+.sg-stack { display: flex; flex-direction: column; gap: var(--space-4); }
+.sg-card-demo { display: flex; flex-direction: column; gap: var(--space-4); }
+.sg-type-sample { padding: var(--space-3) 0; border-bottom: 1px dashed var(--color-border); }
+.sg-type-sample small { color: var(--color-text-faint); }
+
+@media (max-width: 640px) {
+  .sg { padding: 0 var(--space-4) var(--space-8); }
+  .sg-atlas { grid-template-columns: 1fr; }
+  .sg-atlas__head { display: none; }
+  .sg-atlas__row-label { flex-direction: row; align-items: baseline; gap: var(--space-2); margin-top: var(--space-4); padding-bottom: var(--space-2); border-bottom: 1px solid var(--color-border); }
+  .sg-atlas__cell { flex-direction: row; justify-content: flex-start; gap: var(--space-4); }
+}
