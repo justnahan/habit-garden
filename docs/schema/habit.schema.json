@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://habit-garden.app/schema/habit.schema.json",
+  "title": "Habit",
+  "description": "一個使用者想養成的習慣。欄位設計考慮未來可平移至真實資料庫。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "plant", "reminder", "createdAt", "updatedAt"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "唯一識別碼（UUID 或等效唯一字串）。"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "習慣名稱，例如「每天喝水 8 杯」。"
+    },
+    "plant": {
+      "type": "string",
+      "enum": ["sunflower", "cactus", "bonsai", "lavender", "fern"],
+      "description": "代表此習慣的植物種類。"
+    },
+    "reminder": {
+      "description": "提醒 / 期望頻率。",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": { "const": "daily" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "days"],
+          "properties": {
+            "kind": { "const": "weekly" },
+            "days": {
+              "type": "array",
+              "description": "期望完成的星期，0=週日 … 6=週六。",
+              "items": { "type": "integer", "minimum": 0, "maximum": 6 },
+              "uniqueItems": true,
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "建立時間，ISO 8601。"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "最後更新時間，ISO 8601。"
+    }
+  }
+}
