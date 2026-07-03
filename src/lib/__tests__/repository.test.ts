@@ -134,3 +134,48 @@ describe('持久化', () => {
     expect(repo.getHabit(h.id)?.name).toBe('喝水'); // 內部狀態未被影響
   });
 });
+
+describe('變更訂閱（React 重繪來源）', () => {
+  it('打卡 / 新增 / 刪除都會通知訂閱者並遞增 revision', () => {
+    let notified = 0;
+    const base = repo.getRevision();
+    const unsubscribe = repo.subscribe(() => {
+      notified += 1;
+    });
+
+    const h = repo.createHabit({ name: '喝水', plant: 'fern', reminder: daily });
+    repo.toggleCheckIn(h.id, '2026-07-03'); // 打卡完成
+    repo.toggleCheckIn(h.id, '2026-07-03'); // 取消，仍是一次寫入
+    repo.deleteHabit(h.id);
+
+    expect(notified).toBe(4);
+    expect(repo.getRevision()).toBe(base + 4);
+    unsubscribe();
+  });
+
+  it('reset 也會通知（清空後畫面要回到空狀態）', () => {
+    let notified = 0;
+    repo.subscribe(() => {
+      notified += 1;
+    });
+    repo.reset();
+    expect(notified).toBe(1);
+  });
+
+  it('解除訂閱後不再收到通知', () => {
+    let notified = 0;
+    const unsubscribe = repo.subscribe(() => {
+      notified += 1;
+    });
+    unsubscribe();
+    repo.createHabit({ name: '運動', plant: 'cactus', reminder: daily });
+    expect(notified).toBe(0);
+  });
+
+  it('未寫入時 revision 保持穩定（避免無限重繪）', () => {
+    const before = repo.getRevision();
+    repo.listHabits();
+    repo.getRevision();
+    expect(repo.getRevision()).toBe(before);
+  });
+});
