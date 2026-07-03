@@ -1,0 +1,224 @@
+/*
+ * 新增 / 編輯習慣表單版面 —— 只引用 design system 的 ②system token，不自造色值。
+ * 桌面 (1280px) 左預覽 + 右欄位兩欄；手機 (375px) 收成單欄、預覽在上。
+ */
+
+.habit-form {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.habit-form__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+.habit-form__title {
+  font-size: var(--text-2xl);
+}
+
+/* 兩欄：左預覽、右欄位 */
+.habit-form__grid {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+/* ───────────── 植物即時預覽 ───────────── */
+.habit-form__preview {
+  position: sticky;
+  top: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--color-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.habit-form__preview-stage {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 140px;
+}
+.habit-form__preview-name {
+  font-weight: var(--weight-medium);
+  text-align: center;
+}
+
+/* ───────────── 欄位區 ───────────── */
+.habit-form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* ───────────── 植物種類選擇（視覺 radiogroup） ───────────── */
+.plant-choices {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-2);
+}
+.plant-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--ease-fast) var(--ease-standard),
+    background var(--ease-fast) var(--ease-standard),
+    transform var(--ease-fast) var(--ease-standard);
+}
+.plant-choice:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-border-strong);
+}
+.plant-choice.is-selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+.plant-choice__art {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.plant-choice__label {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.plant-choice.is-selected .plant-choice__label {
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+}
+.plant-choice:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+/* ───────────── 提醒頻率：分段切換 ───────────── */
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  gap: 3px;
+  background: var(--color-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.segmented__btn {
+  min-height: 36px;
+  padding: 6px var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--ease-fast) var(--ease-standard),
+    color var(--ease-fast) var(--ease-standard);
+}
+.segmented__btn.is-active {
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+.segmented__btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+/* ───────────── 每週星期選擇 ───────────── */
+.weekday-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.weekday {
+  width: 44px;
+  height: 44px;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: border-color var(--ease-fast) var(--ease-standard),
+    background var(--ease-fast) var(--ease-standard),
+    color var(--ease-fast) var(--ease-standard);
+}
+.weekday:hover {
+  border-color: var(--color-border-strong);
+}
+.weekday.is-on {
+  color: var(--btn-accent-fg);
+  background: var(--btn-accent-bg);
+  border-color: transparent;
+  font-weight: var(--weight-medium);
+}
+.weekday:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+/* ───────────── 動作列 ───────────── */
+.habit-form__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-rule);
+}
+.habit-form__actions-main {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* ───────────── 手機 (≤ 640px)：單欄，預覽收窄置頂 ───────────── */
+@media (max-width: 640px) {
+  .habit-form__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+  .habit-form__preview {
+    position: static;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--space-4);
+  }
+  .habit-form__preview-stage {
+    height: 96px;
+  }
+  .plant-choices {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .habit-form__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .habit-form__actions-main {
+    flex-direction: column;
+  }
+  .habit-form__actions-main .btn {
+    width: 100%;
+  }
+  .habit-form__delete {
+    width: 100%;
+  }
+}
