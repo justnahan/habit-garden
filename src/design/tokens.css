@@ -1,0 +1,236 @@
+/*
+ * HabitGarden — Design Tokens（三層繼承模型）
+ * ①reference 原始值 → ②system 語意角色 → ③component 元件槽位
+ * 鐵則：component 只引用 system；system 只引用 reference；reference 不直接用在元件。
+ *
+ * 識別錨點：19 世紀植物標本圖鑑 / 種子目錄（銅版刻線 + 活版標本標籤）。
+ * 色盤：墨綠(botanical ink) × 朱紅(手工上色 vermilion)。刻意避開 sage/米白/teal/indigo。
+ * 完整決策見專案根目錄 DESIGN.md。
+ */
+
+/* ───────────────────────────── ①reference ───────────────────────────── */
+:root {
+  /* 墨綠 ink — 主色（葉片刻線 / 品牌） */
+  --ref-ink-50:  #eaf2ec;
+  --ref-ink-100: #d3e4d8;
+  --ref-ink-200: #a9c9b4;
+  --ref-ink-300: #7caa8c;
+  --ref-ink-400: #4e8767;
+  --ref-ink-500: #2f6b4b;
+  --ref-ink-600: #235539;
+  --ref-ink-700: #1b4530;
+  --ref-ink-800: #143224;
+  --ref-ink-900: #0e2419;
+  --ref-ink-950: #081810;
+
+  /* 朱紅 vermilion — accent（種子目錄手工上色：花 / 果 / 唯一亮點） */
+  --ref-verm-50:  #fcede7;
+  --ref-verm-100: #f7d3c6;
+  --ref-verm-200: #efa890;
+  --ref-verm-300: #e67e5d;
+  --ref-verm-400: #db5c36;
+  --ref-verm-500: #c8431f;
+  --ref-verm-600: #a9371a;
+  --ref-verm-700: #892c15;
+  --ref-verm-800: #6b2311;
+  --ref-verm-900: #4e1a0d;
+
+  /* 芥黃 ochre — 語意警示（成熟 / 接近中斷） */
+  --ref-ochre-100: #f2e6c8;
+  --ref-ochre-300: #ddb768;
+  --ref-ochre-500: #be8a2c;
+  --ref-ochre-700: #8a6013;
+
+  /* 胭脂 carmine — 語意危險 / 破壞性操作（果實冷紅，與 vermilion 分色相） */
+  --ref-carmine-100: #f3d3d8;
+  --ref-carmine-300: #d17182;
+  --ref-carmine-500: #9e2b3f;
+  --ref-carmine-700: #6f1c2c;
+
+  /* 枯褐 umber — 枯萎植物狀態專用（誠實的植物凋亡色，永遠搭圖示＋文字） */
+  --ref-umber-100: #e6dbd0;
+  --ref-umber-300: #b09a86;
+  --ref-umber-500: #7a5a44;
+  --ref-umber-700: #533c2c;
+
+  /* 標本靛 slate — 語意資訊（中性藍，圖鑑索引） */
+  --ref-slate-100: #d7e0e6;
+  --ref-slate-300: #7d97a9;
+  --ref-slate-500: #3c5a73;
+  --ref-slate-700: #294156;
+
+  /* 標本紙 paper — 冷調紙白中性階（非暖米白：帶極淡綠灰，讀作壓紙不是奶油） */
+  --ref-paper-0:   #fbfcf9;
+  --ref-paper-50:  #f4f6f1;
+  --ref-paper-100: #e9ece3;
+  --ref-paper-200: #d5dbcc;
+  --ref-paper-300: #c2c8b9;
+  --ref-paper-600: #6e7a6f;
+  --ref-paper-700: #47554c;
+  --ref-paper-900: #17251c;
+
+  /* 夜間標本櫃 night — 暗色底階（帶綠相的近黑，非純黑） */
+  --ref-night-0:   #101a14;
+  --ref-night-50:  #16241b;
+  --ref-night-100: #1d3025;
+  --ref-night-200: #2c4033;
+  --ref-night-300: #3c5546;
+  --ref-night-500: #7c8b7f;
+  --ref-night-700: #a9b8ac;
+  --ref-night-900: #eaf0e7;
+}
+
+/* ───────────────────── ②system（語意角色）— 亮色（預設） ───────────────────── */
+:root {
+  /* 底層次 */
+  --color-canvas:  var(--ref-paper-0);   /* 全頁畫布 */
+  --color-surface: #ffffff;              /* 卡片面 */
+  --color-raised:  var(--ref-paper-50);  /* 抬升 / 次要面 */
+  --color-sunken:  var(--ref-paper-100); /* 凹陷 / 群組底 */
+
+  /* 文字 */
+  --color-text:       var(--ref-paper-900);
+  --color-text-muted: var(--ref-paper-700);
+  --color-text-faint: var(--ref-paper-600);
+  --color-text-on-ink:   var(--ref-paper-0);
+  --color-text-on-accent: #ffffff;
+
+  /* 邊界 / 格線（標本紙格） */
+  --color-border:        var(--ref-paper-200);
+  --color-border-strong: var(--ref-paper-300);
+  --color-grid:          rgba(43, 66, 51, 0.05); /* 方格標本紙肌理，極淡 */
+  --color-rule:          var(--ref-paper-900);   /* 標本標籤 ruled underline */
+
+  /* 品牌 / accent */
+  --color-primary:       var(--ref-ink-700);
+  --color-primary-hover: var(--ref-ink-800);
+  --color-primary-soft:  var(--ref-ink-50);
+  --color-accent:        var(--ref-verm-500);
+  --color-accent-hover:  var(--ref-verm-600);
+  --color-accent-soft:   var(--ref-verm-50);
+
+  /* 語意狀態（各自不同色相，不一色多義） */
+  --color-success:      var(--ref-ink-600);
+  --color-success-soft: var(--ref-ink-50);
+  --color-warning:      var(--ref-ochre-500);
+  --color-warning-soft: var(--ref-ochre-100);
+  --color-danger:       var(--ref-carmine-500);
+  --color-danger-soft:  var(--ref-carmine-100);
+  --color-info:         var(--ref-slate-500);
+  --color-info-soft:    var(--ref-slate-100);
+
+  /* 生長階段語意色（映射到植物插畫 + 徽章；茂盛/枯萎另有圖示與文字，不只靠色） */
+  --color-stage-seed:     var(--ref-paper-600);
+  --color-stage-sprout:   var(--ref-ink-400);
+  --color-stage-growing:  var(--ref-ink-600);
+  --color-stage-blooming: var(--ref-verm-500);
+  --color-stage-withered: var(--ref-umber-500);
+
+  /* 排版 */
+  --font-sans: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui,
+    -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Fraunces', 'Noto Serif TC', Georgia, serif; /* 學名 / 大數字 */
+
+  --text-caption: 0.75rem;  /* 12 */
+  --text-label:   0.8125rem;/* 13 */
+  --text-sm:      0.875rem; /* 14 */
+  --text-base:    1rem;     /* 16 */
+  --text-lg:      1.125rem; /* 18 */
+  --text-xl:      1.375rem; /* 22 */
+  --text-2xl:     1.75rem;  /* 28 */
+  --text-3xl:     2.25rem;  /* 36 */
+  --text-4xl:     3rem;     /* 48 */
+
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-bold:    700;
+  --tracking-label: 0.14em; /* 標本標籤大寫字距 */
+  --tracking-tight: -0.01em;
+  --leading-tight: 1.2;
+  --leading-body:  1.6;
+
+  /* 間距節奏（4/8 基準，區塊 > 群組 > 元素） */
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+  --space-9: 64px;
+
+  /* 形狀（俐落：2–4px；full 只給 chip / 圓點） */
+  --radius-sm:   2px;
+  --radius-md:   4px;
+  --radius-lg:   6px;
+  --radius-full: 999px;
+
+  /* 分層陰影（克制，優先用邊框；shadow 表層級不表裝飾） */
+  --shadow-raised:  0 1px 2px rgba(14, 36, 25, 0.06);
+  --shadow-overlay: 0 8px 24px -8px rgba(14, 36, 25, 0.18);
+
+  /* 動效 token */
+  --ease-fast: 120ms;
+  --ease-base: 200ms;
+  --ease-slow: 320ms;
+  --ease-standard:   cubic-bezier(0.2, 0, 0, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0, 1);
+  --ease-spring:     cubic-bezier(0.2, 0.8, 0.2, 1.2);
+
+  /* 圖示（house 刻線圖示集：單一來源、統一線重） */
+  --icon-stroke: 1.75;
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+
+  color-scheme: light;
+}
+
+/* ───────────────────── ②system — 暗色（夜間標本櫃） ─────────────────────
+ * 過暗色關卡：①雙色（ink 底 + vermilion accent）②帶綠相的底非純黑
+ * ③elevation 移色相不只移明度 ④層級靠文字色階。 */
+:root[data-theme='dark'] {
+  --color-canvas:  var(--ref-night-0);
+  --color-surface: var(--ref-night-50);
+  --color-raised:  var(--ref-night-100);
+  --color-sunken:  #0b130f;
+
+  --color-text:       var(--ref-night-900);
+  --color-text-muted: var(--ref-night-700);
+  --color-text-faint: var(--ref-night-500);
+  --color-text-on-ink:   var(--ref-night-900);
+  --color-text-on-accent: #1a0d08;
+
+  --color-border:        var(--ref-night-200);
+  --color-border-strong: var(--ref-night-300);
+  --color-grid:          rgba(124, 139, 127, 0.08);
+  --color-rule:          var(--ref-night-700);
+
+  --color-primary:       var(--ref-ink-300);
+  --color-primary-hover: var(--ref-ink-200);
+  --color-primary-soft:  var(--ref-night-100);
+  --color-accent:        var(--ref-verm-400);
+  --color-accent-hover:  var(--ref-verm-300);
+  --color-accent-soft:   rgba(219, 92, 54, 0.14);
+
+  --color-success:      var(--ref-ink-300);
+  --color-success-soft: rgba(78, 135, 103, 0.16);
+  --color-warning:      var(--ref-ochre-300);
+  --color-warning-soft: rgba(190, 138, 44, 0.16);
+  --color-danger:       var(--ref-carmine-300);
+  --color-danger-soft:  rgba(158, 43, 63, 0.2);
+  --color-info:         var(--ref-slate-300);
+  --color-info-soft:    rgba(60, 90, 115, 0.22);
+
+  --color-stage-seed:     var(--ref-night-500);
+  --color-stage-sprout:   var(--ref-ink-300);
+  --color-stage-growing:  var(--ref-ink-200);
+  --color-stage-blooming: var(--ref-verm-300);
+  --color-stage-withered: var(--ref-umber-300);
+
+  --shadow-raised:  0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-overlay: 0 10px 28px -8px rgba(0, 0, 0, 0.6);
+
+  color-scheme: dark;
+}
