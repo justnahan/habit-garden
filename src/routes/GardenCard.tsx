@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 import type { Habit, HabitStatus } from '../types';
 import { Plant } from '../design/plants/Plant';
 import { Button, Card, StageBadge } from '../design/components';
-import { IconCheck, IconDroplet } from '../design/icons';
+import { IconCheck, IconDroplet, IconPencil } from '../design/icons';
 import { plantMeta } from '../design/tokens';
 
 interface GardenCardProps {
@@ -46,6 +46,15 @@ export function GardenCard({ index, habit, status, doneToday, onToggle }: Garden
       as="li"
       className={`garden-card${doneToday ? ' is-done' : ''}${withered ? ' is-withered' : ''}`}
     >
+      <Link
+        className="garden-card__edit btn btn--ghost btn--icon btn--sm"
+        to={`/habits/${habit.id}/edit`}
+        aria-label={`編輯「${habit.name}」`}
+        title="編輯習慣"
+      >
+        <IconPencil size={16} />
+      </Link>
+
       <div className="garden-card__stage">
         {/* key=waterNonce：每次澆水 remount，讓「輕跳」動畫重新播放 */}
         <span

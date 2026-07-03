@@ -1,20 +1,22 @@
 import { Link } from 'react-router-dom';
+import { EmptyState as EmptyStateBlock } from '../design/states';
+import { IconPlus } from '../design/icons';
 
 /**
- * 空狀態（骨架佔位）：尚未建立任何習慣時的引導畫面。
- * 實際插圖與文案留待後續 stage；此處先確保有非空白的引導內容。
+ * 空狀態預覽路由（/empty）。
+ *
+ * 真正的空狀態在花園總覽無習慣時就會顯示（同一個 design-system 元件）；
+ * 這條路由只是方便單獨預覽該畫面，兩者共用 `design/states` 的 EmptyState，
+ * 不各自維護一份插圖與文案。
  */
 export function EmptyState() {
   return (
-    <section className="empty-state">
-      <div className="empty-illustration" aria-hidden>
-        🪴
-      </div>
-      <h1>你的花園還是空的</h1>
-      <p>種下第一個習慣，開始讓花園慢慢長大吧。</p>
-      <Link className="btn" to="/habits/new">
-        ＋ 新增第一個習慣
-      </Link>
-    </section>
+    <EmptyStateBlock
+      actions={
+        <Link className="btn btn--accent" to="/habits/new">
+          <IconPlus size={18} /> 種下第一個習慣
+        </Link>
+      }
+    />
   );
 }
