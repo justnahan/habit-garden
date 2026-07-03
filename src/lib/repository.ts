@@ -42,6 +42,10 @@ export class HabitRepository {
   private state: PersistedState;
   private readonly store: KeyValueStore | null | undefined;
   private readonly now: () => Date;
+  /** 變更訂閱者；任何寫入落地後通知，讓 React 層重繪。 */
+  private readonly listeners = new Set<() => void>();
+  /** 單調遞增的版本號，供 `useSyncExternalStore` 當作穩定 snapshot。 */
+  private revision = 0;
 
   constructor(options: RepositoryOptions = {}) {
     this.store = options.store;
@@ -50,9 +54,31 @@ export class HabitRepository {
       options.store === undefined ? loadState() : loadState(options.store);
   }
 
+  /**
+   * 訂閱資料變更，回傳解除訂閱函式。UI 用它在打卡 / 新增等寫入後重繪，
+   * 不必手動輪詢，也不必在每個畫面各自管理狀態。
+   */
+  subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  /** 目前版本號；每次寫入 +1，未變則回傳同一個值（讓 snapshot 穩定）。 */
+  getRevision(): number {
+    return this.revision;
+  }
+
+  private emit(): void {
+    this.revision += 1;
+    for (const listener of this.listeners) listener();
+  }
+
   private persist(): void {
     if (this.store === undefined) saveState(this.state);
     else saveState(this.state, this.store);
+    this.emit();
   }
 
   private iso(): string {
@@ -176,6 +202,7 @@ export class HabitRepository {
     this.state = emptyState();
     if (this.store === undefined) clearState();
     else clearState(this.store);
+    this.emit();
   }
 }
 
