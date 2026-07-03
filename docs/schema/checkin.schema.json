@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://habit-garden.app/schema/checkin.schema.json",
+  "title": "CheckIn",
+  "description": "單次打卡紀錄。同一個 habit 同一天最多一筆。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "habitId", "date", "completed", "updatedAt"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "唯一識別碼。"
+    },
+    "habitId": {
+      "type": "string",
+      "description": "所屬習慣的 id（對應 Habit.id）。"
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "本地日期 YYYY-MM-DD（不含時區），作為一天的唯一鍵。"
+    },
+    "completed": {
+      "type": "boolean",
+      "description": "該天是否完成。保留 false 可表達「明確取消」。"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "建立 / 最後修改時間，ISO 8601。"
+    }
+  }
+}
