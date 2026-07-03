@@ -90,9 +90,13 @@ streak 與生長邏輯只計算「期望完成日」：
 | `sprout` 發芽 | streak 1–2 |
 | `growing` 成長 | streak 3–6 |
 | `blooming` 盛開 | streak ≥ 7 |
-| `withered` 枯萎 | 連續錯過期望日 ≥ 3（優先於正向階段） |
+| `withered` 枯萎 | `currentStreak = 0`（含今天也沒打卡）**且**連續錯過期望日 ≥ 3 |
 
 門檻可透過 `GrowthConfig` 調整（見 `src/lib/growth.ts`）。
+
+**枯萎不變量**：枯萎 ⇔ `currentStreak = 0`。依 PRD「清楚但不苛責、不粗暴歸零」的
+語調，長期中斷後**今天一打卡就脫離枯萎**（`currentStreak` 變為 1），立刻回到
+seed/sprout 起點重新長，不必等到下一個期望日。
 
 ### 中斷重啟不丟歷史
 

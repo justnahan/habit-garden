@@ -103,8 +103,9 @@ export function currentMissedStreak(
 }
 
 /**
- * 歷史最長連續天數。掃過所有已完成日期（去重排序），逐一累加期望日。
- * 因為只計期望日，兩個相鄰完成日之間若「中間都不是期望日」仍視為連續。
+ * 歷史最長連續天數。只計「期望日」的完成紀錄，與 `currentStreak` 語意一致：
+ * 非期望日的打卡（例如 weekly 只選週一卻多打了週二）不計入，避免歷史最長虛高。
+ * 兩個相鄰完成日之間若「中間都不是期望日」仍視為連續。
  */
 export function longestStreak(
   checkins: CheckIn[],
@@ -113,7 +114,11 @@ export function longestStreak(
   const completed = completedDateSet(checkins);
   if (completed.size === 0) return 0;
 
-  const days = [...completed].sort(); // YYYY-MM-DD 字串排序即時間排序。
+  // 先過濾出期望日的完成紀錄，再排序（YYYY-MM-DD 字串排序即時間排序）。
+  const days = [...completed]
+    .filter((d) => isExpectedDay(d, freq))
+    .sort();
+  if (days.length === 0) return 0;
   let best = 0;
   let run = 0;
   let prev: string | null = null;

@@ -102,4 +102,13 @@ describe('longestStreak', () => {
     const checkins = [...range('2026-06-01', 5), ...range('2026-06-10', 2)];
     expect(longestStreak(checkins, daily)).toBe(5);
   });
+
+  it('weekly：非期望日的打卡不灌水（只計期望日）', () => {
+    // 每週一。2026-06-01 是週一，週一為 6/1、6/8…
+    const freq: ReminderFrequency = { kind: 'weekly', days: [1] };
+    // 完成兩個週一（6/1、6/8，連續）＋ 一個非期望的週二 6/2。
+    const checkins = [ci('2026-06-01'), ci('2026-06-02'), ci('2026-06-08')];
+    // 若未過濾期望日，6/1→6/2→6/8 會被算成 3；正確應只計兩個週一 = 2。
+    expect(longestStreak(checkins, freq)).toBe(2);
+  });
 });

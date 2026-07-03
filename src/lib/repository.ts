@@ -14,7 +14,7 @@ import type {
   ReminderFrequency,
 } from '../types';
 import { newId } from './id';
-import { todayKey } from './date';
+import { isDateKey, todayKey } from './date';
 import {
   clearState,
   emptyState,
@@ -72,6 +72,7 @@ export class HabitRepository {
   createHabit(input: CreateHabitInput): Habit {
     const name = input.name.trim();
     if (!name) throw new Error('習慣名稱不可為空');
+    validateReminder(input.reminder);
 
     const ts = this.iso();
     const habit: Habit = {
@@ -97,7 +98,10 @@ export class HabitRepository {
       habit.name = name;
     }
     if (patch.plant !== undefined) habit.plant = patch.plant;
-    if (patch.reminder !== undefined) habit.reminder = patch.reminder;
+    if (patch.reminder !== undefined) {
+      validateReminder(patch.reminder);
+      habit.reminder = patch.reminder;
+    }
     habit.updatedAt = this.iso();
 
     this.persist();
@@ -127,6 +131,7 @@ export class HabitRepository {
    * 設定某天的完成狀態（新增或覆寫）。回傳該筆 checkin。
    */
   setCheckIn(habitId: string, date: string, completed: boolean): CheckIn {
+    if (!isDateKey(date)) throw new Error(`無效的日期鍵（需 YYYY-MM-DD）：${date}`);
     if (!this.getHabit(habitId)) throw new Error(`找不到習慣：${habitId}`);
 
     const existing = this.getCheckIn(habitId, date);
@@ -172,6 +177,18 @@ export class HabitRepository {
     if (this.store === undefined) clearState();
     else clearState(this.store);
   }
+}
+
+/**
+ * 驗證提醒頻率。weekly 的 `days` 空陣列會讓該習慣永無期望日、streak 恆為 0，
+ * 重複的星期也沒有意義，兩者都在寫入前擋掉。
+ */
+function validateReminder(reminder: ReminderFrequency): void {
+  if (reminder.kind !== 'weekly') return;
+  const { days } = reminder;
+  if (days.length === 0) throw new Error('每週提醒至少要選一天');
+  if (new Set(days).size !== days.length) throw new Error('每週提醒的星期不可重複');
+  if (days.some((d) => d < 0 || d > 6)) throw new Error('每週提醒的星期需介於 0–6');
 }
 
 /** structuredClone 的安全版本（不可用時退回 JSON round-trip）。 */

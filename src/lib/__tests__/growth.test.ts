@@ -68,6 +68,19 @@ describe('evaluateHabit', () => {
     expect(status.totalCompleted).toBe(8);
   });
 
+  it('長期中斷後今天重新打卡 → 立刻脫離枯萎（方案 A：一打卡即復活）', () => {
+    // 一段舊紀錄後長期中斷，直到今天 7/3 才重新打卡。
+    const checkins = [...range('2026-06-01', 3), ci('2026-07-03')];
+    const status = evaluateHabit(checkins, daily, { today: '2026-07-03' });
+
+    expect(status.currentStreak).toBe(1); // 今天這 1 天
+    expect(status.missedStreak).toBeGreaterThanOrEqual(
+      DEFAULT_GROWTH_CONFIG.witherAfter,
+    ); // 過去確實累積了足以枯萎的錯過
+    expect(status.stage).not.toBe('withered'); // 但今天已澆水 → 不再枯萎
+    expect(status.stage).toBe('sprout'); // 回到起點重新長
+  });
+
   it('中斷後重新開始：只重置當前連續天數，不刪歷史紀錄', () => {
     // 6/1–6/5 連 5 天，中斷數天，7/2、7/3 重新開始 2 天，today=7/3
     const checkins = [...range('2026-06-01', 5), ...range('2026-07-02', 2)];

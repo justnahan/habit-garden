@@ -60,6 +60,47 @@ describe('CheckIn', () => {
   it('對不存在的習慣打卡會丟錯', () => {
     expect(() => repo.setCheckIn('nope', '2026-07-03', true)).toThrow();
   });
+
+  it('拒絕非 YYYY-MM-DD 的髒日期鍵', () => {
+    const h = repo.createHabit({ name: '喝水', plant: 'fern', reminder: daily });
+    expect(() => repo.setCheckIn(h.id, '2026/07/03', true)).toThrow();
+    expect(() => repo.setCheckIn(h.id, '2026-13-40', true)).toThrow();
+    expect(() => repo.setCheckIn(h.id, 'today', true)).toThrow();
+  });
+});
+
+describe('reminder 驗證', () => {
+  it('拒絕 weekly.days 為空陣列', () => {
+    expect(() =>
+      repo.createHabit({ name: '運動', plant: 'cactus', reminder: { kind: 'weekly', days: [] } }),
+    ).toThrow();
+  });
+
+  it('拒絕 weekly.days 重複', () => {
+    expect(() =>
+      repo.createHabit({
+        name: '運動',
+        plant: 'cactus',
+        reminder: { kind: 'weekly', days: [1, 1, 3] },
+      }),
+    ).toThrow();
+  });
+
+  it('updateHabit 改成非法 weekly 也會被擋', () => {
+    const h = repo.createHabit({ name: '運動', plant: 'cactus', reminder: daily });
+    expect(() => repo.updateHabit(h.id, { reminder: { kind: 'weekly', days: [] } })).toThrow();
+    // 原本的 reminder 不應被改動
+    expect(repo.getHabit(h.id)?.reminder).toEqual(daily);
+  });
+
+  it('接受合法的 weekly', () => {
+    const h = repo.createHabit({
+      name: '運動',
+      plant: 'cactus',
+      reminder: { kind: 'weekly', days: [1, 3, 5] },
+    });
+    expect(h.reminder).toEqual({ kind: 'weekly', days: [1, 3, 5] });
+  });
 });
 
 describe('持久化', () => {
