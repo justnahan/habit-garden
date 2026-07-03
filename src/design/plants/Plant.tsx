@@ -4,10 +4,12 @@
  * 用法：<Plant type="fern" stage="blooming" />
  *
  * 設計原則（對應 DESIGN.md 生長階段視覺規格）：
- * - 筆觸＝刻線（stroke，currentColor），葉片有葉脈、羽片、肌理——像標本圖鑑的手繪，
- *   不是單線火柴棒。填色用 fillOpacity（低），輪廓 stroke 維持清晰＝銅版刻線質感。
+ * - 筆觸＝刻線（stroke，currentColor），葉片有葉脈、羽片、肌理——像標本圖鑑手繪。
+ *   填色用 fillOpacity（低），輪廓 stroke 維持清晰＝銅版刻線質感。
  * - 顏色由階段語意 token 決定，**茂盛/枯萎不只靠顏色**：
- *     盛開 = 直立＋滿冠綻放＋朱紅手工上色的花；枯萎 = 下垂＋斷莖＋掉葉＋乾燥短線。
+ *     盛開 = 直立＋滿冠綻放＋朱紅手工上色的花；
+ *     枯萎 = **每種植物有各自的凋亡樣態**（向日葵垂頭、仙人掌皺縮、盆栽枯枝、
+ *            薰衣草穗垂落、蕨葉捲曲），不是共用一種下垂。
  * - 每種植物有不可誤認的剪影記號：向日葵花盤 / 仙人掌棘刺 / 盆栽層雲樹冠 /
  *   薰衣草花穗 / 蕨的羽狀葉與捲芽。
  */
@@ -31,7 +33,7 @@ const FILL = 0.16;
 
 /* ───────────────────────── 可重用刻線零件 ───────────────────────── */
 
-/** 標準葉片：填色 ＋ 清晰輪廓 ＋ 中肋 ＋ 側脈（銅版刻線感）。原點在葉基、葉尖朝上。 */
+/** 標準葉片：填色 ＋ 清晰輪廓 ＋ 中肋 ＋ 側脈。原點在葉基、葉尖朝上。 */
 function Leaf({ x, y, rot = 0, s = 1, veins = true }: { x: number; y: number; rot?: number; s?: number; veins?: boolean }) {
   return (
     <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`}>
@@ -48,35 +50,32 @@ function Leaf({ x, y, rot = 0, s = 1, veins = true }: { x: number; y: number; ro
   );
 }
 
-/** 盆栽層雲樹冠：帶起伏邊緣 ＋ 針葉肌理。 */
+/** 盆栽/松的層雲樹冠：圓潤起伏的葉團 ＋ 內部層次弧線（不是向下的梳齒）。 */
 function FoliagePad({ cx, cy, rx, ry }: { cx: number; cy: number; rx: number; ry: number }) {
-  // 起伏的雲團輪廓
-  const bumps = 5;
-  let d = `M ${cx - rx} ${cy}`;
+  const bumps = 4;
+  const step = (2 * rx) / bumps;
+  let d = `M ${(cx - rx).toFixed(1)} ${cy.toFixed(1)}`;
   for (let i = 0; i < bumps; i++) {
-    const t0 = i / bumps;
-    const t1 = (i + 1) / bumps;
-    const ang0 = Math.PI - t0 * Math.PI;
-    const ang1 = Math.PI - t1 * Math.PI;
-    const x0 = cx + Math.cos(ang0) * rx;
-    const x1 = cx + Math.cos(ang1) * rx;
-    const cxp = (x0 + x1) / 2;
-    const cyp = cy - ry - ry * 0.5;
-    d += ` Q ${cxp.toFixed(1)} ${cyp.toFixed(1)} ${x1.toFixed(1)} ${cy}`;
+    const x0 = cx - rx + i * step;
+    const x1 = x0 + step;
+    const mx = (x0 + x1) / 2;
+    const edge = i === 0 || i === bumps - 1 ? 0.7 : 1;
+    const cyTop = cy - ry * 1.7 * edge;
+    d += ` Q ${mx.toFixed(1)} ${cyTop.toFixed(1)} ${x1.toFixed(1)} ${cy.toFixed(1)}`;
   }
-  d += ` Q ${cx} ${(cy + ry * 0.7).toFixed(1)} ${cx - rx} ${cy} Z`;
-  // 針葉短線
-  const ticks = [];
-  for (let i = 0; i < 6; i++) {
-    const tx = cx - rx * 0.7 + (i / 5) * rx * 1.4;
-    const ty = cy - ry * 0.2;
-    ticks.push(`M${tx.toFixed(1)} ${ty.toFixed(1)} l0 -${(ry * 0.7).toFixed(1)}`);
+  d += ` Q ${cx.toFixed(1)} ${(cy + ry * 0.85).toFixed(1)} ${(cx - rx).toFixed(1)} ${cy.toFixed(1)} Z`;
+  const tex: string[] = [];
+  for (let i = 0; i < 3; i++) {
+    const tx = cx - rx * 0.5 + i * rx * 0.5;
+    tex.push(
+      `M${(tx - 3).toFixed(1)} ${(cy - ry * 0.2).toFixed(1)} Q${tx.toFixed(1)} ${(cy - ry * 0.9).toFixed(1)} ${(tx + 3).toFixed(1)} ${(cy - ry * 0.2).toFixed(1)}`,
+    );
   }
   return (
     <g>
       <path d={d} fill="currentColor" fillOpacity={FILL} />
-      <g strokeWidth={1.1} opacity={0.55}>
-        <path d={ticks.join('')} />
+      <g strokeWidth={1.1} opacity={0.4}>
+        <path d={tex.join('')} />
       </g>
     </g>
   );
@@ -98,7 +97,6 @@ function Frond({ p0, c, p1, n = 7, leaf = 8 }: { p0: [number, number]; c: [numbe
     const nx = -dy;
     const ny = dx;
     const L = leaf * (1 - t * 0.55);
-    // 兩側羽片，混一點主軸方向讓它朝尖端傾
     const lx = x + nx * L + dx * L * 0.35;
     const ly = y + ny * L + dy * L * 0.35;
     const rx = x - nx * L + dx * L * 0.35;
@@ -116,18 +114,20 @@ function Frond({ p0, c, p1, n = 7, leaf = 8 }: { p0: [number, number]; c: [numbe
   );
 }
 
-/** 薰衣草花穗：綠莖 ＋ 頂端密集朱紅小花。 */
+/** 薰衣草花穗：綠莖 ＋ 頂端漸縮的朱紅小花（上小下大）。 */
 function Spike({ x, yBase, yTop }: { x: number; yBase: number; yTop: number }) {
-  const florets = 6;
+  const n = 7;
+  const step = 3.4;
+  const stemBottom = yTop + n * step;
   const dots = [];
-  for (let i = 0; i < florets; i++) {
-    const cy = yTop + i * ((yBase - yTop) * 0.32) / florets * 3.1;
-    const r = 2.6 - i * 0.18;
-    dots.push(<ellipse key={i} cx={x} cy={cy} rx={r} ry={r * 1.25} fill={ACCENT} stroke="none" />);
+  for (let i = 0; i < n; i++) {
+    const cy = yTop + i * step;
+    const r = 1.7 + i * 0.16;
+    dots.push(<ellipse key={i} cx={x} cy={cy} rx={r} ry={r * 1.3} fill={ACCENT} stroke="none" />);
   }
   return (
     <g>
-      <path d={`M${x} ${yBase} Q${x - 1.5} ${(yBase + yTop) / 2} ${x} ${yTop + 2}`} strokeWidth={2} />
+      <path d={`M${x} ${yBase} Q${x - 1.5} ${(yBase + stemBottom) / 2} ${x} ${stemBottom.toFixed(1)}`} strokeWidth={2} />
       {dots}
     </g>
   );
@@ -138,7 +138,9 @@ function Blossom({ cx, cy, r = 3 }: { cx: number; cy: number; r?: number }) {
   const petals = [];
   for (let i = 0; i < 5; i++) {
     const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
-    petals.push(<ellipse key={i} cx={cx + Math.cos(a) * r} cy={cy + Math.sin(a) * r} rx={r * 0.7} ry={r * 0.5} transform={`rotate(${(a * 180) / Math.PI + 90} ${cx + Math.cos(a) * r} ${cy + Math.sin(a) * r})`} fill={ACCENT} fillOpacity={0.85} stroke="none" />);
+    petals.push(
+      <ellipse key={i} cx={cx + Math.cos(a) * r} cy={cy + Math.sin(a) * r} rx={r * 0.7} ry={r * 0.5} transform={`rotate(${(a * 180) / Math.PI + 90} ${cx + Math.cos(a) * r} ${cy + Math.sin(a) * r})`} fill={ACCENT} fillOpacity={0.85} stroke="none" />,
+    );
   }
   return (
     <g>
@@ -193,31 +195,105 @@ function Seed() {
   );
 }
 
-function WitheredForm() {
-  return (
-    <>
-      <Soil />
-      <path d="M60 122 C60 106 60 98 58 92 C56 86 50 84 44 88" />
-      <path d="M58 96 L52 90" strokeWidth={1.6} opacity="0.7" />
-      <g fillOpacity={0.1}>
-        <path d="M58 100 C50 102 46 108 47 114 C54 113 59 107 58 100 Z" fill="currentColor" />
-        <path d="M60 108 C68 112 72 118 70 122 C64 121 60 115 60 108 Z" fill="currentColor" />
-        <path d="M84 124 C80 121 78 123 79 127 C83 128 86 127 84 124 Z" fill="currentColor" />
-      </g>
-      <g opacity="0.55" strokeWidth="1.4">
-        <path d="M40 96 l-4 -3" />
-        <path d="M72 118 l4 -2" />
-        <path d="M50 112 l-3 3" />
-      </g>
-    </>
-  );
+/* ───────────────────────── 各植物的枯萎（各不相同） ─────────────────────────
+ * currentColor 已是枯褐 umber；差異靠**形狀**（灰階可辨）。 */
+function Withered({ type }: { type: PlantType }) {
+  switch (type) {
+    case 'sunflower':
+      // 高莖垂頭、掉落的花瓣
+      return (
+        <>
+          <Soil />
+          <path d="M60 122 C60 102 63 84 56 77 C51 71 44 73 42 80" />
+          <circle cx="41" cy="84" r="6" fill="currentColor" fillOpacity={0.14} />
+          <g strokeWidth={1.5} opacity={0.7}>
+            <path d="M41 90 v5 M36 88 l-3 4 M46 88 l3 3 M35 82 l-4 1" />
+          </g>
+          <path d="M60 100 C52 102 48 108 50 113 C56 111 60 105 60 100 Z" fill="currentColor" fillOpacity={0.12} />
+          <g fill="currentColor" fillOpacity={0.5} stroke="none">
+            <path d="M70 122 C67 119 65 121 66 124 C69 125 72 124 70 122 Z" />
+            <path d="M80 124 C77 122 75 123 76 126 C79 127 81 126 80 124 Z" />
+          </g>
+        </>
+      );
+    case 'cactus':
+      // 皺縮傾斜、垂臂、掉落的段
+      return (
+        <>
+          <Soil />
+          <path d="M55 122 Q49 98 57 89 Q66 93 63 122 Z" fill="currentColor" fillOpacity={0.1} />
+          <path d="M55 122 Q49 98 57 89 Q66 93 63 122" />
+          <g strokeWidth={1.3} opacity={0.55}>
+            <path d="M53 112 Q58 110 62 112 M52 104 Q57 102 61 104 M53 96 Q57 95 61 96" />
+          </g>
+          <path d="M62 104 Q72 106 72 116" />
+          <g strokeWidth={1.2} opacity={0.6}>
+            <path d="M57 90 v-3 M53 100 l-3 -1 M72 112 l3 1" />
+          </g>
+          <path d="M40 122 Q37 116 42 114 Q46 118 44 122 Z" fill="currentColor" fillOpacity={0.1} />
+          <path d="M40 122 Q37 116 42 114 Q46 118 44 122" />
+        </>
+      );
+    case 'bonsai':
+      // 盆中枯枝：光禿曲幹 ＋ 斷枝 ＋ 盆內落針
+      return (
+        <>
+          <Tray />
+          <path d="M60 116 C56 108 63 104 59 96 C56 90 61 85 65 82" strokeWidth={3} />
+          <g strokeWidth={2}>
+            <path d="M59 100 C53 98 51 94 48 92" />
+            <path d="M62 92 C67 90 69 86 72 85" />
+            <path d="M65 82 C66 78 68 76 69 73" />
+          </g>
+          <g strokeWidth={1.4} opacity={0.7}>
+            <path d="M48 92 l-4 -1 M72 85 l4 -1 M69 73 l1 -4" />
+          </g>
+          <g strokeWidth={1.2} opacity={0.55}>
+            <path d="M48 120 l3 2 M66 121 l-3 2 M58 122 l1 2" />
+          </g>
+        </>
+      );
+    case 'lavender':
+      // 花穗垂落、掉落的花
+      return (
+        <>
+          <Soil />
+          <g>
+            <path d="M50 122 Q49 104 43 100 Q38 98 37 103" />
+            <path d="M60 122 Q61 102 67 99 Q72 98 72 104" />
+            <path d="M55 122 Q54 108 51 101" />
+          </g>
+          <g fill="currentColor" fillOpacity={0.5} stroke="none">
+            <ellipse cx="37" cy="103" rx="2" ry="2.4" />
+            <ellipse cx="72" cy="104" rx="2" ry="2.4" />
+            <ellipse cx="51" cy="101" rx="1.8" ry="2.2" />
+            <circle cx="46" cy="120" r="1.8" />
+            <circle cx="64" cy="122" r="1.8" />
+            <circle cx="56" cy="124" r="1.6" />
+          </g>
+        </>
+      );
+    case 'fern':
+      // 羽葉捲曲乾枯、垂落
+      return (
+        <>
+          <Soil />
+          <path d="M60 122 C58 108 51 102 46 106 C42 109 45 114 49 111" strokeWidth={2.4} />
+          <path d="M60 122 C62 107 70 102 75 106 C79 110 75 115 71 112" strokeWidth={2.4} />
+          <path d="M60 122 C60 110 57 102 61 97" strokeWidth={2.2} />
+          <g strokeWidth={1.2} opacity={0.6}>
+            <path d="M54 110 l-4 -1 M50 106 l-3 -2 M66 110 l4 -1 M70 106 l3 -2 M59 104 l-3 -1" />
+          </g>
+        </>
+      );
+  }
 }
 
-/* ───────────────────────── 各植物本體 ───────────────────────── */
+/* ───────────────────────── 各植物本體（sprout/growing/blooming） ───────────────────────── */
 
 function PlantBody({ type, stage }: { type: PlantType; stage: GrowthStage }) {
   if (stage === 'seed') return <Seed />;
-  if (stage === 'withered') return <WitheredForm />;
+  if (stage === 'withered') return <Withered type={type} />;
 
   switch (type) {
     /* ── 向日葵 ── */
@@ -239,31 +315,26 @@ function PlantBody({ type, stage }: { type: PlantType; stage: GrowthStage }) {
             <Leaf x={59} y={104} rot={-52} s={0.95} />
             <Leaf x={61} y={90} rot={52} s={0.95} />
             <Leaf x={60} y={78} rot={-38} s={0.75} />
-            {/* 含苞 */}
             <path d="M60 68 C53 66 52 57 60 54 C68 57 67 66 60 68 Z" fill="currentColor" fillOpacity={FILL} />
             <path d="M60 54 C58 50 62 50 60 54" strokeWidth={1.4} opacity={0.7} />
           </>
         );
-      // blooming
       return (
         <g className="plant-anim">
           <Soil />
           <path d="M60 122 C60 100 61 82 60 62" />
           <Leaf x={58} y={104} rot={-54} s={1} />
           <Leaf x={62} y={88} rot={54} s={1} />
-          {/* 外圈花瓣 */}
           <g fill={ACCENT} stroke={ACCENT} strokeWidth={1.2} fillOpacity={0.9}>
             {Array.from({ length: 15 }).map((_, i) => (
               <path key={`o${i}`} d={petalPath(60, 44, (i / 15) * Math.PI * 2, 11, 27, 4.4)} />
             ))}
           </g>
-          {/* 內圈花瓣（錯位、稍短） */}
           <g fill={ACCENT} stroke={ACCENT} strokeWidth={1} fillOpacity={1}>
             {Array.from({ length: 15 }).map((_, i) => (
               <path key={`i${i}`} d={petalPath(60, 44, ((i + 0.5) / 15) * Math.PI * 2, 9, 19, 3.4)} />
             ))}
           </g>
-          {/* 花心 ＋ 種盤肌理 */}
           <circle cx="60" cy="44" r="10.5" fill="var(--color-primary)" stroke="none" />
           <g stroke="var(--color-canvas)" strokeWidth={1} opacity={0.5}>
             <circle cx="60" cy="44" r="7" fill="none" />
@@ -288,19 +359,14 @@ function PlantBody({ type, stage }: { type: PlantType; stage: GrowthStage }) {
         return (
           <>
             <Soil />
-            {/* 主體 */}
             <path d="M51 122 Q49 84 60 80 Q71 84 69 122 Z" fill="currentColor" fillOpacity={0.13} />
             <path d="M51 122 Q49 84 60 80 Q71 84 69 122" />
-            {/* 手臂 */}
             <path d="M69 106 Q83 106 83 92 Q83 84 76 84" fill="currentColor" fillOpacity={0.13} />
             <path d="M69 106 Q83 106 83 92 Q83 84 76 84" />
-            {/* 稜線 */}
             <g strokeWidth={1.1} opacity={0.45}><path d="M60 116 V86 M55 116 Q54 100 57 88 M65 116 Q66 100 63 88" /></g>
-            {/* 棘刺 */}
             <g strokeWidth="1.2" opacity="0.7"><path d="M60 90 v-5 M55 102 l-3 -2 M65 102 l3 -2 M55 112 l-3 -1 M65 112 l3 -1 M81 92 l4 -1 M80 98 l4 1" /></g>
           </>
         );
-      // blooming
       return (
         <g className="plant-anim">
           <Soil />
@@ -312,7 +378,6 @@ function PlantBody({ type, stage }: { type: PlantType; stage: GrowthStage }) {
           <path d="M50 102 Q36 102 36 88 Q36 81 42 81" />
           <g strokeWidth={1.1} opacity={0.45}><path d="M60 118 V82 M55 118 Q54 100 57 84 M65 118 Q66 100 63 84" /></g>
           <g strokeWidth="1.2" opacity="0.7"><path d="M55 106 l-3 -2 M65 106 l3 -2 M55 116 l-3 -1 M65 116 l3 -1 M83 92 l4 -1 M38 90 l-4 -1" /></g>
-          {/* 頂端花冠 */}
           <Blossom cx={60} cy={72} r={4} />
           <Blossom cx={49} cy={82} r={2.6} />
           <Blossom cx={83} cy={86} r={2.6} />
@@ -334,27 +399,27 @@ function PlantBody({ type, stage }: { type: PlantType; stage: GrowthStage }) {
         return (
           <>
             <Tray />
-            {/* 曲幹 */}
-            <path d="M60 116 C57 108 63 104 60 96 C57 90 62 85 67 82" strokeWidth={3} />
-            <FoliagePad cx={68} cy={78} rx={17} ry={9} />
-            <FoliagePad cx={52} cy={84} rx={11} ry={6} />
+            {/* 曲幹（有粗細與姿態） */}
+            <path d="M60 116 C56 110 63 105 59 98 C56 92 62 88 66 85" strokeWidth={3.2} />
+            {/* 後方低矮葉團先畫，主樹冠疊在上面 */}
+            <FoliagePad cx={49} cy={91} rx={10} ry={6} />
+            <FoliagePad cx={67} cy={80} rx={16} ry={9} />
           </>
         );
-      // blooming = 滿冠層雲
       return (
+        // blooming = 層雲滿冠
         <g className="plant-anim">
           <Tray />
-          <path d="M60 116 C56 106 63 100 59 90 C55 82 63 78 66 70" strokeWidth={3.2} />
-          <path d="M62 84 C68 80 74 82 78 78" strokeWidth={2.4} />
-          <FoliagePad cx={50} cy={80} rx={15} ry={8} />
-          <FoliagePad cx={76} cy={70} rx={18} ry={10} />
-          <FoliagePad cx={62} cy={56} rx={15} ry={8} />
-          {/* 朱紅結果 */}
+          <path d="M60 116 C55 106 64 100 58 91 C54 84 62 80 66 74" strokeWidth={3.4} />
+          <path d="M59 96 C53 92 50 94 47 90" strokeWidth={2.4} />
+          <FoliagePad cx={47} cy={84} rx={13} ry={8} />
+          <FoliagePad cx={72} cy={70} rx={17} ry={9} />
+          <FoliagePad cx={60} cy={54} rx={13} ry={8} />
           <g fill={ACCENT} stroke="none">
-            <circle cx="72" cy="66" r="2" />
-            <circle cx="50" cy="78" r="2" />
-            <circle cx="64" cy="53" r="1.9" />
-            <circle cx="80" cy="72" r="1.6" />
+            <circle cx="72" cy="68" r="2" />
+            <circle cx="47" cy="82" r="2" />
+            <circle cx="61" cy="52" r="1.9" />
+            <circle cx="79" cy="72" r="1.6" />
           </g>
         </g>
       );
@@ -373,37 +438,37 @@ function PlantBody({ type, stage }: { type: PlantType; stage: GrowthStage }) {
         );
       if (stage === 'growing')
         return (
+          // 叢生的年輕薰衣草：狹葉基叢 ＋ 多枝含苞
           <>
             <Soil />
-            {/* 叢生莖 */}
-            <g strokeWidth={2}>
-              <path d="M50 122 Q49 102 50 90" />
-              <path d="M60 122 V88" />
-              <path d="M70 122 Q71 102 70 90" />
-              <path d="M55 122 Q54 106 56 96" />
-              <path d="M65 122 Q66 106 64 96" />
+            <path d="M45 122 Q60 108 75 122 Z" fill="currentColor" fillOpacity={0.1} />
+            <g strokeWidth={1.6} opacity={0.6}>
+              <path d="M60 120 L49 104 M60 120 L71 104 M60 120 L54 101 M60 120 L66 101 M60 120 L60 99" />
             </g>
-            {/* 銀葉 */}
-            <g strokeWidth={1.3} opacity={0.6}><path d="M50 110 l-6 3 M60 108 l-6 3 M70 110 l6 3 M64 112 l6 2" /></g>
-            {/* 含苞（綠） */}
-            {[50, 60, 70].map((x, i) => (
-              <path key={i} d={`M${x} 90 q3 -8 0 -12 q-3 4 0 12`} fill="currentColor" fillOpacity={FILL} strokeWidth={1.4} />
-            ))}
+            {[48, 54, 60, 66, 72].map((x, i) => {
+              const top = [94, 88, 84, 88, 94][i];
+              return (
+                <g key={i}>
+                  <path d={`M60 118 Q${x} 106 ${x} ${top + 8}`} strokeWidth={1.8} />
+                  <path d={`M${x} ${top + 8} q3 -7 0 -12 q-3 5 0 12`} fill="currentColor" fillOpacity={FILL} strokeWidth={1.4} />
+                </g>
+              );
+            })}
           </>
         );
-      // blooming：滿叢花穗
       return (
+        // blooming：滿叢花穗 ＋ 較實的基部葉叢
         <g className="plant-anim">
           <Soil />
-          {/* 基部銀葉叢 */}
-          <path d="M44 122 Q60 110 76 122 Z" fill="currentColor" fillOpacity={0.1} />
-          <g strokeWidth={1.3} opacity={0.55}><path d="M50 118 l-7 3 M58 116 l-8 3 M70 118 l7 3 M64 116 l8 2 M60 118 v5" /></g>
-          {/* 花穗 */}
-          <Spike x={46} yBase={116} yTop={68} />
-          <Spike x={54} yBase={118} yTop={58} />
-          <Spike x={62} yBase={116} yTop={62} />
-          <Spike x={70} yBase={118} yTop={70} />
-          <Spike x={60} yBase={117} yTop={50} />
+          <path d="M43 122 Q60 108 77 122 Z" fill="currentColor" fillOpacity={0.1} />
+          <g strokeWidth={1.4} opacity={0.55}>
+            <path d="M52 120 l-8 3 M58 118 l-9 2 M68 120 l8 3 M62 118 l9 2 M60 119 v4 M55 121 l-6 2 M66 121 l6 2" />
+          </g>
+          <Spike x={46} yBase={116} yTop={70} />
+          <Spike x={54} yBase={118} yTop={60} />
+          <Spike x={62} yBase={116} yTop={64} />
+          <Spike x={70} yBase={118} yTop={72} />
+          <Spike x={59} yBase={117} yTop={52} />
         </g>
       );
 
@@ -413,7 +478,6 @@ function PlantBody({ type, stage }: { type: PlantType; stage: GrowthStage }) {
         return (
           <>
             <Soil />
-            {/* 捲芽 fiddlehead */}
             <path d="M60 122 C60 108 57 98 64 92 C71 86 66 78 60 80 C55 82 57 89 62 88" strokeWidth={2.4} />
             <Frond p0={[60, 118]} c={[54, 108]} p1={[47, 104]} n={4} leaf={5} />
           </>
@@ -424,11 +488,9 @@ function PlantBody({ type, stage }: { type: PlantType; stage: GrowthStage }) {
             <Soil />
             <Frond p0={[60, 122]} c={[48, 100]} p1={[38, 92]} n={6} leaf={7} />
             <Frond p0={[60, 122]} c={[72, 100]} p1={[82, 92]} n={6} leaf={7} />
-            {/* 中間未展的捲芽 */}
             <path d="M60 122 C59 106 56 96 62 88 C67 83 62 78 57 80" strokeWidth={2.2} />
           </>
         );
-      // blooming = 滿叢羽狀葉
       return (
         <g className="plant-anim">
           <Soil />
@@ -455,7 +517,6 @@ export function Plant({
   const meta = stageMeta[stage];
   const pm = plantMeta[type];
   const alt = `${pm.label}・${meta.label}階段`;
-  // 葉/莖用「植物色」：盛開時葉仍是深綠，只有花（ACCENT）才是朱紅手工上色。
   const foliage = stage === 'blooming' ? 'var(--color-primary)' : stageColorVar[stage];
   return (
     <span
