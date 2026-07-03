@@ -1,0 +1,168 @@
+/*
+ * 花園總覽（首頁）版面 —— 只引用 design system 的 ②system token，不自造色值。
+ */
+
+/* ───────────── 頁首 ───────────── */
+.garden-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+.garden-head__titles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.garden-head__title {
+  font-size: var(--text-2xl);
+}
+.garden-head__summary {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.garden-head__summary .u-numeric {
+  color: var(--color-text);
+}
+
+/* ───────────── 卡片格 ───────────── */
+.garden-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: var(--space-5);
+}
+
+/* ───────────── 單張植物卡 ───────────── */
+.garden-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  position: relative;
+  transition: border-color var(--ease-base) var(--ease-standard),
+    box-shadow var(--ease-base) var(--ease-standard);
+}
+/* 打卡完成瞬間，卡片邊界輕輕點亮（色彩變化回饋，非阻擋操作） */
+.garden-card.is-done {
+  border-color: var(--color-primary);
+}
+.garden-card.is-withered {
+  border-color: var(--color-border-strong);
+  background: var(--color-raised);
+}
+
+/* 植物舞台：置中、固定高度避免不同階段造成版面跳動 */
+.garden-card__stage {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 148px;
+  background: var(--color-sunken);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+/* 舞台底線＝標本紙壓線，呼應圖鑑母題 */
+.garden-card__stage::after {
+  content: '';
+  position: absolute;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: var(--space-4);
+  border-bottom: 1.5px solid var(--color-rule);
+  opacity: 0.35;
+}
+.garden-card__plant {
+  transform-origin: bottom center;
+}
+/* 打卡「抽長」回饋：容器輕跳一下，各階段都給得到回饋（含 seed/sprout） */
+.garden-card__plant.is-watering {
+  animation: plant-pop var(--ease-slow) var(--ease-spring) both;
+}
+@keyframes plant-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.07) translateY(-2px); }
+  100% { transform: scale(1); }
+}
+
+/* 澆水水珠迸發（動畫回饋層；不吃指標事件，不擋連續打卡） */
+.garden-card__burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.garden-card__burst span {
+  position: absolute;
+  left: 50%;
+  bottom: 42%;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full) var(--radius-full) var(--radius-full) 0;
+  background: var(--color-accent);
+  opacity: 0;
+  transform: translateX(-50%) rotate(45deg);
+  animation: droplet 640ms var(--ease-decelerate) both;
+}
+.garden-card__burst span:nth-child(1) { --dx: -34px; --dy: -30px; animation-delay: 0ms; }
+.garden-card__burst span:nth-child(2) { --dx: 0px;   --dy: -46px; animation-delay: 40ms; background: var(--color-primary); }
+.garden-card__burst span:nth-child(3) { --dx: 34px;  --dy: -30px; animation-delay: 80ms; }
+.garden-card__burst span:nth-child(4) { --dx: -18px; --dy: -40px; animation-delay: 20ms; background: var(--color-primary); }
+.garden-card__burst span:nth-child(5) { --dx: 20px;  --dy: -40px; animation-delay: 60ms; }
+@keyframes droplet {
+  0% { opacity: 0; transform: translateX(-50%) translate(0, 0) rotate(45deg) scale(0.6); }
+  25% { opacity: 0.95; }
+  100% { opacity: 0; transform: translateX(-50%) translate(var(--dx), var(--dy)) rotate(45deg) scale(1); }
+}
+
+/* 卡片文字區 */
+.garden-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.garden-card__name {
+  color: var(--color-text);
+  text-decoration: none;
+  font-weight: var(--weight-medium);
+  font-size: var(--text-base);
+}
+.garden-card__name:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.garden-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.garden-card__streak {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+.garden-card__streak .u-numeric {
+  font-size: var(--text-lg);
+  color: var(--color-text);
+  font-weight: var(--weight-bold);
+}
+.garden-card__streak.is-lit { color: var(--color-accent); }
+.garden-card__streak.is-lit .u-numeric { color: var(--color-accent); }
+
+/* 打卡按鈕撐滿卡片底部 */
+.garden-card .btn--checkin {
+  width: 100%;
+  margin-top: auto;
+}
+
+@media (max-width: 480px) {
+  .garden-grid { grid-template-columns: 1fr; }
+  .garden-head { align-items: flex-start; }
+  .garden-head__title { font-size: var(--text-xl); }
+}
